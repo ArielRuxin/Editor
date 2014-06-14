@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-2.1.1.min.js"></script>
+<script>
+(function() {
+	var countTextLength, addUser, userLogged, searchFile, fileFound, editInterval, conQuest, conUpdate, ret, _cuser, _cfilename;
+
+	countTextLength = function() {
+  		$('#charNum').html('<p> Words count: ' + ($('#inputText').val()).length + '</p>');
+	};
+
+  addUser = function() {
+    _cuser = $("form#adduser input#username").val();
+    if (_cuser === "") {
+      return false;
+    }
+    $("form#adduser input#username").val("");
+    console.log("add user", _cuser);
+
+	//=========================test for userLogged before server works
+    $("#adduserdiv").hide();
+    if (_cuser === null || _cuser.length === 0) {
+      users.append("No user.");
+      return;
+    }
+    $("#currentuid").html('<p> Current User: ' + _cuser + '</p>');
+    $("#searchfilediv").show();
+    //===========================
+    
+    /*$.ajax({
+      url: "api/add-user",
+      type: "POST",
+      data: _cuser,
+      success: userLogged,
+      cache: false
+    });*/
+    return false;
+  };
+  
+  userLogged = function() {
+    $("#adduserdiv").hide();
+    $("#currentuid").html('<p> Current User: ' + _cuser + '</p>');
+    $("#searchfilediv").show();
+  };
+
+  searchFile = function(){
+    _cfilename = $("form#searchfile input#efile").val();
+    if (_cfilename === "") {
+      return false;
+    }
+    $("form#searchfile input#efile").val("");
+    console.log("search file", _cfilename);
+
+	// =========================test for userLogged before server works
+    $("#searchfilediv").hide();
+    if (_cfilename === null || _cfilename.length === 0) {
+      $("#nofilewarning").html('<p> Unsuccessful </p>');
+      return;
+    }
+    $("#fileID").html('<p> Current file: ' + _cfilename + '</p>');
+    $("#fileID").show();
+    
+    $("table#onlineUserList").show();
+    		
+	var editor = $("textarea#inputText");    
+    
+	editor.show();
+	
+	countTextLength();
+    editor.keydown(function() {
+    	return setTimeout((function() {
+    		countTextLength();
+			//var cursorPosition = editor.prop("selectionStart");
+			//$("#fileID").html("Caret: down " + cursorPosition);
+    	}), 1000);
+    });
+    editor.keyup(function() {
+    	return setTimeout((function() {
+    		countTextLength();
+			//var cursorPosition = editor.prop("selectionStart");
+			//$("#fileID").html("Caret: up " + cursorPosition);
+    	}), 1000);
+    });
+    
+    editInterval();
+    //===========================
+    
+    /*$.ajax({
+      url: "api/search-file",
+      type: "POST",
+      data: _cfilename,
+      success: fileFound,
+      cache: false
+    });*/
+    return false;
+  };
+  
+  //fileFound = function(){
+  
+  //}
+  
+  editInterval = function(){
+  	var t1 = setInterval(function() {
+  		//var key = event.keyCode || event.charCode;
+		var startlength = ($("#inputText").val()).length;
+		var startposition = $("#inputText").prop("selectionStart");
+		/*if ( key == 46 ) {
+			var startdel = $("#inputText").prop("selectionStart");
+		}*/
+		var starttext = $("#inputText").val();
+		$("#fileID").html("p: " + startposition + "  l: " + startlength);
+		var t2 = setTimeout(function() {
+    		var endlength = ($("#inputText").val()).length;
+			var endposition = $("#inputText").prop("selectionStart");
+			var result;
+			if ( parseInt(endlength, 10) > parseInt(startlength, 10) ) {			
+				result = ($("#inputText").val()).substring(parseInt(startposition, 10), parseInt(endposition, 10));
+			} else if ( parseInt(endlength, 10) < parseInt(startlength, 10) ) {
+				result = starttext.substring(parseInt(endposition, 10), parseInt(startlength, 10));
+			} else {
+				result = "null";
+			}
+			$("#fileID").html(result);
+			
+			/*$.ajax({
+      			url: "api/textEdit",
+      			type: "POST",
+      			data: result + add/del,
+      			//success: ??,
+      			cache: false
+    		});*/
+    	}, 500);
+    }, 500);
+  };
+
+	/*conQuest = function(){
+	  	var t1 = setInterval(function() {
+	  		var ins = "ReqUp";
+			/*$.ajax({
+      			url: "api/update-request",
+      			type: "POST",
+      			data: ins,
+      			success: conUpdate,
+      			cache: false
+    		});
+    	}, 3000);
+	}
+	
+	conUpdate = function(data){
+    	var context;
+    	ret = JSON.parse(data);
+    	if (ret.Err !== "") {
+      		appendError(ret.Err);
+      		return;
+    	}
+    	context = ret.User;
+    	$("#inputText").val(context);		
+	}*/
+
+	main = function() {
+			
+		$("textarea#inputText").hide();
+		$("table#onlineUserList").hide();
+		
+		$("div#fileID").hide();
+		$("div#adduserdiv").show();
+		$("div#searchfilediv").hide();
+		
+		$("form#adduser").submit(addUser);
+		$("form#searchfile").submit(searchFile);
+
+  	};
+
+  	$(document).ready(main);
+
+}).call(this);
+
+</script>
+</head>
+
+<body>
+	<table border=1>
+		<tr>
+			<td valign="baseline"><div id="fileID"><p>TID</p></div></td>
+			<td></td>
+			<td valign="baseline"><h1> Collaborative Editing </h1></td>
+		</tr>
+		<tr>
+			<td rowspan="2">
+				<div id="login">
+					<div id="adduserdiv">
+						Enter User Name
+            			<form id="adduser" action="#" method="post">
+                			<input id="username" type="input" class="input"/>
+                			<input class="button" type="submit" value="Participate"/>
+            			</form>
+        			</div>
+        			<div id="currentuid"></div>
+        			<div id="searchfilediv">
+        				Enter File Name
+        				<form id="searchfile" action="#" method="post">
+                			<input id="efile" type="input" class="input"/>
+                			<input class="button" type="submit" value="Search"/>
+            			</form>
+            			<div id="nofilewarning"></div>
+					</div>
+				</div>
+			</td>
+			<td rowspan="2" valign="top">
+				<table id="onlineUserList">
+					<tr><th>Online User</th></tr>
+					<tr><td>a (this is u)</td></tr>
+					<tr><td>b </td></tr>
+				</table>
+			</td>
+			<td><textarea id="inputText" style="width: 500px; height: 300px;"></textarea></td>
+		</tr>		
+		<tr>
+			<td><div id="charNum"></div></td>
+		</tr>
+	</table>
+</body>
+</html>
